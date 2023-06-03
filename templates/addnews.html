@@ -5,6 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
     <style>
+      .page-title-container {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+      }
       .file-upload {
         width: 100%;
         display: flex;
@@ -47,8 +52,55 @@
         height: 100%;
         object-fit: cover;
       }
+
+      .button {
+  border: none;
+  color: white;
+  padding: 16px 32px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 4px 2px;
+  transition-duration: 0.4s;
+  cursor: pointer;
+}
+
+.button1 {
+  background-color: white;
+  color: black;
+  border: 2px solid #4CAF50;
+}
+
+.button1:hover {
+  background-color: #4CAF50;
+  color: white;
+}
+.loader {
+  border: 16px solid #f3f3f3;
+  border-radius: 50%;
+  border-top: 16px solid blue;
+  border-right: 16px solid green;
+  border-bottom: 16px solid red;
+  border-left: 16px solid pink;
+  width: 80px;
+  height: 80px;
+  -webkit-animation: spin 2s linear infinite;
+  animation: spin 2s linear infinite;
+  display: none;
+}
+
+@-webkit-keyframes spin {
+  0% { -webkit-transform: rotate(0deg); }
+  100% { -webkit-transform: rotate(360deg); }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
     </style>
-    <title>File upload in Golang</title>
+    <title>Add News Around You</title>
   </head>
   <body>
     <div class="page-title-container">
@@ -57,69 +109,113 @@
     <div class="file-preview-container">
       <div class="file-preview" id="file-preview"></div>
     </div>
+
     <div class="file-upload">
       <div class="file-upload__area">
-        <h3>Single File Upload</h3>
+        <h3>Enter news title</h3>
+        <input type="text" name="" id="title" width="80%"/>
+      </div>
+    </div>
+    <div class="file-upload">
+      <div class="file-upload__area">
+        <h3>Enter news summary</h3>
+        <textarea name="" id="summary" cols="60" rows="5"></textarea>
+      </div>
+    </div>
+    <div class="file-upload">
+      <div class="file-upload__area">
+        <h3>Enter news content</h3>
+        <textarea name="" id="body" cols="60" rows="5"></textarea>
+      </div>
+    </div>
+    <div class="file-upload">
+      <div class="file-upload__area">
+        <h3>Select news photo</h3>
         <input type="file" name="" id="single_file_upload" max="1" />
       </div>
     </div>
+
     <div class="file-upload">
       <div class="file-upload__area">
-        <h3>Multiple File Upload</h3>
-        <input type="file" name="" id="mulitple_files_upload" multiple />
+        <button type="submit" id="submit" class="button button1">Add news</button>
+        <div class="loader" id="progressbar"></div>
+        <div id="log"></div>
       </div>
-    </div>
-    <script>
-      const SERVER_ENDPOINT = "http://localhost:8000";
-      const IMAGE_PREVIEW = document.getElementById("file-preview");
-      //   Upload Single Image
-      document
-        .getElementById("single_file_upload")
-        .addEventListener("change", async (event) => {
-          try {
-            let formData = new FormData();
-            formData.append("image", event.target.files[0]);
-            const data = await fetch(`${SERVER_ENDPOINT}/upload/single`, {
-              body: formData,
-              method: "POST",
-            }).then((res) => res.json());
 
-            const imgHolder = document.createElement("div");
-            const imgElement = document.createElement("img");
-            imgHolder.classList.add("file-preview__el");
-            imgElement.classList.add("file-preview__img");
-            imgElement.src = data.filepath;
-            imgHolder.appendChild(imgElement);
-            IMAGE_PREVIEW.appendChild(imgHolder);
-          } catch (error) {
-            alert(error.message);
-          }
+    </div>
+
+    <script>
+      const SERVER_ENDPOINT = "http://localhost:8080";
+      const IMAGE_PREVIEW = document.getElementById("file-preview");
+
+
+        var titleEl = document.getElementById("title")
+        var summaryEl = document.getElementById("summary")
+        var bodyEl = document.getElementById("body")
+        var submitEl = document.getElementById("submit");
+        var progressbarEl = document.getElementById("progressbar");
+        var logEl = document.getElementById("log");
+        var fileEl = document.getElementById("single_file_upload");
+        var selectedFile;
+
+        fileEl.addEventListener("change", (event)=>{
+selectedFile = event.target.files[0];
         });
 
-      // Mulitple File Upload
-      document
-        .getElementById("mulitple_files_upload")
-        .addEventListener("change", async (event) => {
+        var showLoading = function(message) {
+          submitEl.style.display = "none";
+            progressbarEl.style.display = "initial";
+            logEl.textContent = message;
+        }
+
+        var hideLoading = function(message) {
+          submitEl.style.display = "initial";
+            progressbarEl.style.display = "none";
+            logEl.textContent = message;
+        }
+
+        var resetForm = function () {
+          titleEl.value = "";
+          summaryEl.value = "";
+          bodyEl.value = "";
+          fileEl.value = "";
+        }
+
+        submitEl.addEventListener("click", async (event) => {
           try {
             let formData = new FormData();
-            for (let key in event.target.files) {
-              formData.append("images", event.target.files[key]);
-            }
+            formData.append("photo", selectedFile);
+            formData.append("title",titleEl.value);
+            formData.append("summary",summaryEl.value);
+            formData.append("body",bodyEl.value);
 
-            const data = await fetch(`${SERVER_ENDPOINT}/upload/multiple`, {
+            //console.log(formData);
+
+            showLoading("Harap bersabar...");
+
+            const data = await fetch(`${SERVER_ENDPOINT}/cijou/news/add`, {
               body: formData,
               method: "POST",
-            }).then((res) => res.json());
-
-            data.filepaths.forEach((filepath) => {
-              const imgHolder = document.createElement("div");
-              const imgElement = document.createElement("img");
-              imgHolder.classList.add("file-preview__el");
-              imgElement.classList.add("file-preview__img");
-              imgElement.src = filepath;
-              imgHolder.appendChild(imgElement);
-              IMAGE_PREVIEW.appendChild(imgHolder);
+            }).then((res)=>{
+              console.log(res);
+              hideLoading("Sukses tambah berita");
+              resetForm();
+              return res.json();
+            }).catch((error)=>{
+              hideLoading("Gagal tambah berita");
             });
+
+
+
+            // data.filepaths.forEach((filepath) => {
+            //   const imgHolder = document.createElement("div");
+            //   const imgElement = document.createElement("img");
+            //   imgHolder.classList.add("file-preview__el");
+            //   imgElement.classList.add("file-preview__img");
+            //   imgElement.src = filepath;
+            //   imgHolder.appendChild(imgElement);
+            //   IMAGE_PREVIEW.appendChild(imgHolder);
+            // });
           } catch (error) {
             alert(error.message);
           }

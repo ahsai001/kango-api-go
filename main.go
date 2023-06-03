@@ -11,7 +11,7 @@ import (
 )
 
 func init() {
-	filehelper.InitFolder("public/photo/")
+	filehelper.InitFolder("upload/photo/")
 }
 
 func main() {

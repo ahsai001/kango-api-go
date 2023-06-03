@@ -42,7 +42,7 @@ func GetNewsDetail(ctx *gin.Context) {
 }
 
 func AddNews(ctx *gin.Context) {
-	filePath, err := filehelper.UploadSingleFile(ctx.Request, "photo", "public/photo/")
+	filePath, err := filehelper.UploadSingleFile(ctx.Request, "photo", "upload/photo/")
 	if err != nil {
 		log.Println(err)
 	}

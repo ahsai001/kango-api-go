@@ -25,7 +25,7 @@ type NewsResponse struct {
 }
 
 type News struct {
-	ID        uint64 `json:"id"`
+	ID        int64  `json:"id"`
 	Title     string `json:"title"`
 	Summary   string `json:"summary"`
 	Photo     string `json:"photo"`

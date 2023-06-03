@@ -25,7 +25,7 @@ type NewsDetailResponse struct {
 }
 
 type NewsDetail struct {
-	ID        uint64 `json:"id"`
+	ID        int64  `json:"id"`
 	GroupID   uint64 `json:"group_id"`
 	Title     string `json:"title"`
 	Summary   string `json:"summary"`

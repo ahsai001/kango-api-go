@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"kango-api/database"
 	"kango-api/model"
 )
@@ -41,7 +42,7 @@ func GetNews() (*model.NewsResponse, error) {
 	}, nil
 }
 
-func GetNewsDetail(id int) (*model.NewsDetail, error) {
+func GetNewsDetail(id int64) (*model.NewsDetail, error) {
 	db, err := database.Connect()
 	if err != nil {
 		//fmt.Println(err.Error())
@@ -59,4 +60,29 @@ func GetNewsDetail(id int) (*model.NewsDetail, error) {
 	}
 
 	return &result, nil
+}
+
+func AddNews(title string, summary string, body string, filePath string) (*model.NewsDetail, error) {
+	db, err := database.Connect()
+	if err != nil {
+		return nil, err
+	}
+	defer db.Close()
+
+	query := "INSERT INTO `cj_berita` (`title`, `summary`, `body`, `photo`) VALUES (?,?,?,?)"
+	result, err := db.ExecContext(context.Background(), query, title, summary, body, filePath)
+	if err != nil {
+		return nil, err
+	}
+	id, err := result.LastInsertId()
+	if err != nil {
+		return nil, err
+	}
+	newInsertedNews, err := GetNewsDetail(id)
+	if err != nil {
+		return nil, err
+	}
+
+	return newInsertedNews, nil
+
 }

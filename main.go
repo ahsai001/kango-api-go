@@ -1,22 +1,35 @@
 package main
 
 import (
+	"fmt"
 	"kango-api/controller"
+	"kango-api/helper/filehelper"
+
+	"os"
 
 	"github.com/gin-gonic/gin"
 )
 
+func init() {
+	filehelper.InitFolder("public/photo/")
+}
+
 func main() {
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+
 	r := gin.Default()
+	//setting
+	r.MaxMultipartMemory = 8 << 20 // 8 MiB
 
 	//define some routes
-	r.GET("/", func(ctx *gin.Context) {
-		controller.Welcome(ctx)
-	})
-	r.GET("/cijou/news/all", controller.GetNews)
-	r.GET("/cijou/news/detail/:id", controller.GetNewsDetail)
-	r.POST("/cijou/login", controller.Login)
+	r.GET("/", controller.Welcome)
+	r.POST("/cijou/news/all", controller.GetNews)
+	r.POST("/cijou/news/detail/:id", controller.GetNewsDetail)
 	r.POST("/cijou/news/add", controller.AddNews)
+	r.POST("/cijou/login", controller.Login)
 
-	r.Run(":8080")
+	r.Run(fmt.Sprintf(":%s", port))
 }
